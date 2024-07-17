@@ -23,7 +23,7 @@ tasks.create("run") {
     group = "jitsi"
     doLast {
         "docker-compose up -d".runCommand(File(projectDir, workingFolderName))
-        openWebpage("https://localhost:8443")
+        openWebpage("https://localhost:8442")
     }
 }
 
