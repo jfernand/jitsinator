@@ -5,7 +5,10 @@ fun openWebpage(url: String) {
     if (Desktop.isDesktopSupported()) {
         val desktop = Desktop.getDesktop()
         try {
-            desktop.browse(URI(url))
+            if (desktop.isSupported(Desktop.Action.BROWSE))
+                desktop.browse(URI(url))
+            else
+                println("Desktop does not support BROWSE action.")
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -30,7 +30,7 @@ tasks.create("run") {
 tasks.create("runWithJibri") {
     group = "jitsi"
     doLast {
-        "docker-compose up -f docker-compose.yml -f jibri.yml".runCommand(File(projectDir, workingFolderName))
+        "docker-compose -f docker-compose.yml -f jibri.yml up".runCommand(File(projectDir, workingFolderName))
         openWebpage("https://localhost:8443")
     }
 }
@@ -38,7 +38,7 @@ tasks.create("runWithJibri") {
 tasks.create("runWithEtherpad") {
     group = "jitsi"
     doLast {
-        "docker-compose up -f docker-compose.yml -f etherpad.yml".runCommand(File(projectDir, workingFolderName))
+        "docker-compose -f docker-compose.yml -f etherpad.yml up".runCommand(File(projectDir, workingFolderName))
         openWebpage("https://localhost:8443")
     }
 }
