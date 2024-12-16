@@ -7,7 +7,7 @@ sealed interface Os {
     data class Unknown(val osName:String): Os
 }
 
-val currentOS = when {
+fun getCurrentOs() = when {
     isFamily(FAMILY_WINDOWS) -> Os.Windows
     isFamily(FAMILY_MAC) -> Os.Mac
     isFamily(FAMILY_UNIX) -> Os.Linux

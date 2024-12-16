@@ -1,65 +1,71 @@
+import commands.certificateManager
+import commands.commander
+import tasks.DockerComposeUp
+import tasks.Dockerize
+
 val workingFolderName = "jitsi-meet"
 
-tasks.create("dockerize") {
+tasks.register<Dockerize>("dockerize") {
     group = "jitsi"
-    doLast {
-        val name =
-            "curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'zip' | cut -d\\\" -f4".runCommand(
-                projectDir
-            ).getOutput()
-        val folder = downloadAndExtract(name, temporaryDir)
-        errln("Extracted to $folder")
-        val workingFolder = folder.moveTo(projectDir, workingFolderName)
-        File(projectDir, "env.master")
-            .moveTo(workingFolder, ".env")
-        "./gen-passwords.sh".runCommand(workingFolder)
-        "mkdir -p ~/.jitsi-meet-cfg/{web,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}".runCommand(
-            workingFolder
-        )
+    workingFolderName = "jitsi-meet"
+    rootDir.set(projectDir)
+}
+
+with(File(projectDir, workingFolderName)) {
+    tasks.register<DockerComposeUp>("run") {
+        group = "jitsi"
+        workingDir.set(this@with)
+    }
+
+    with(commander(File(projectDir, workingFolderName))) {
+        tasks.create("runWithJibri") {
+            group = "jitsi"
+            doLast {
+                dockerComposeUp("docker-compose.yml", "jibri.yml")
+                openWebpage("https://localhost:8443")
+            }
+        }
+
+        tasks.create("runWithEtherpad") {
+            group = "jitsi"
+            doLast {
+                dockerComposeUp("docker-compose.yml", "etherpad.yml")
+                openWebpage("https://localhost:8443")
+            }
+        }
+    }
+
+    with(commander(projectDir)) {
+        tasks.create("clean") {
+            group = "jitsi"
+            doLast {
+                removeFromFs(buildFolder())
+            }
+        }
     }
 }
 
-tasks.create("run") {
-    group = "jitsi"
-    doLast {
-        "docker-compose up -d".runCommand(File(projectDir, workingFolderName))
-        openWebpage("https://localhost:8442")
+
+with(certificateManager(File(projectDir, "certs"))) {
+    tasks.create("generatePk") {
+        group = "jitsi"
+        doLast {
+            generatePk()
+        }
     }
-}
-
-tasks.create("runWithJibri") {
-    group = "jitsi"
-    doLast {
-        "docker-compose -f docker-compose.yml -f jibri.yml up".runCommand(File(projectDir, workingFolderName))
-        openWebpage("https://localhost:8443")
+    tasks.create("generateCsr") {
+        group = "jitsi"
+        doLast {
+            generateCsr()
+        }
     }
-}
-
-tasks.create("runWithEtherpad") {
-    group = "jitsi"
-    doLast {
-        "docker-compose -f docker-compose.yml -f etherpad.yml up".runCommand(File(projectDir, workingFolderName))
-        openWebpage("https://localhost:8443")
+    tasks.create("generateSelfSignedCert") {
+        group = "jitsi"
+        doLast {
+            generateSelfSignedCert()
+        }
     }
-}
-
-tasks.create("clean") {
-    group = "jitsi"
-    doLast {
-        "rm -Rf ${buildFolder()}".runCommand(projectDir)
-    }
-}
-
-fun errln(s: Any) = System.err.println(s)
-
-fun downloadAndExtract(name: String, tempDir: File): File {
-    errln("Downloading $name")
-    "rm -Rf stable*".runCommand(tempDir)
-    "wget $name".runCommand(tempDir)
-    "unzip *".runCommand(tempDir)
-    return tempDir.listFiles()
-        ?.filter { it.isDirectory }
-        ?.first { it.name.startsWith("jitsi-docker-jitsi-meet-") } ?: error("Could not find jitsi folder in $tempDir")
 }
 
 fun Build_gradle.buildFolder() = layout.buildDirectory.get().asFile
+
