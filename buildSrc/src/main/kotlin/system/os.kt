@@ -1,3 +1,5 @@
+package system
+
 import org.apache.tools.ant.taskdefs.condition.Os.*
 
 sealed interface Os {
