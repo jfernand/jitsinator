@@ -9,9 +9,7 @@ interface Commander {
     fun download(url: String)
     fun removeFromFs(path: File)
     fun removeFromFs(path: String)
-    fun runWithJibri()
     fun dockerComposeUp(vararg configFiles: String)
-    fun runWithEtherpad()
     fun unzip(pathSpec: String)
 }
 
@@ -36,15 +34,7 @@ class WindowsCommander(override val workingDir: File) : Commander {
         TODO("Not yet implemented")
     }
 
-    override fun runWithJibri() {
-        TODO("Not yet implemented")
-    }
-
     override fun dockerComposeUp(vararg configFiles: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun runWithEtherpad() {
         TODO("Not yet implemented")
     }
 
@@ -66,18 +56,18 @@ class LinuxCommander(override val workingDir: File) : Commander {
         "rm -Rf $path".runCommand(workingDir)
     }
 
-    override fun runWithJibri() {
-        "sudo docker-compose -f docker-compose.yml -f jibri.yml up".runCommand(workingDir)
-    }
+//    override fun runWithJibri() {
+//        "sudo docker-compose -f docker-compose.yml -f jibri.yml up".runCommand(workingDir)
+//    }
 
     override fun dockerComposeUp(vararg configFiles: String) {
         val arguments = configFiles.flatMap { listOf("-f", it) }.plus("up").joinToString(" ")
         "sudo docker-compose $arguments -d".runCommand(workingDir)
     }
 
-    override fun runWithEtherpad() {
-        TODO("Not yet implemented")
-    }
+//    override fun runWithEtherpad() {
+//        TODO("Not yet implemented")
+//    }
 
     override fun unzip(pathSpec: String) {
         "unzip $pathSpec".runCommand(workingDir)
