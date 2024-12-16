@@ -1,6 +1,7 @@
 package commands
 
-import getCurrentOs
+import system.Os
+import system.getCurrentOs
 import java.io.File
 
 interface Commander {

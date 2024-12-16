@@ -37,17 +37,23 @@ abstract class DockerComposeUp : DefaultTask() {
 
 abstract class Dockerize: DefaultTask() {
     @get:Input
+    val commander: Commander by lazy { commander(workingDir.asFile.get()) }
+
+    @get:Input
     abstract val workingFolderName: Property<String>
 
     @get:InputDirectory
     abstract val rootDir: DirectoryProperty
+
+    @get:InputDirectory
+    abstract val workingDir: DirectoryProperty
 
     @TaskAction
     fun action() {
         val process =
             "curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'zip' | cut -d\\\" -f4".runCommand(
                 rootDir.asFile.get().absolutePath
-            )
+            ) // TODO make multiplatform
         val zipFile = process.getOutput()
         errln("Downloading and extracting from: |$zipFile|")
 
@@ -62,12 +68,12 @@ abstract class Dockerize: DefaultTask() {
         errln(".env file copied to $workingFolder")
 
         errln("Generating passwords to .env file in $workingFolder")
-        "./gen-passwords.sh".runCommand(workingFolder)
+        "./gen-passwords.sh".runCommand(workingFolder) // TODO make multiplatform
 
         errln("Generating jitsi config files in ~!??!?!")
         "mkdir -p ~/.jitsi-meet-cfg/{web,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}".runCommand(
             workingFolder
-        )
+        ) // TODO make multiplatform
     }
 }
 

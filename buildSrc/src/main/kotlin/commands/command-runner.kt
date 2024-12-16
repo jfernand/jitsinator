@@ -1,7 +1,8 @@
 package commands
 
-import errln
-import getCurrentOs
+import system.Os
+import system.errln
+import system.getCurrentOs
 import java.io.File
 import java.io.InputStream
 
