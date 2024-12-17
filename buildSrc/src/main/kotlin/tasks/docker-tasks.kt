@@ -17,27 +17,38 @@ import system.openWebpage
 import java.io.File
 
 abstract class DockerComposeUp : DefaultTask() {
+    init {
+        group = "dockerCompose"
+        description = "Run docker compose"
+    }
+
     @get:Input
     val commander: Commander by lazy { commander(workingDir.asFile.get()) }
 
     @get:InputDirectory
     abstract val workingDir: DirectoryProperty
 
-    init {
-        group = "jitsi"
-        description = "sample task"
-    }
+    @get:Input
+    abstract val dockerComposeFileNames: Property<Array<String>>
 
     @TaskAction
     fun action() {
-        commander.dockerComposeUp("docker-compose.yml") // TODO accept vars
+        commander.dockerComposeUp(*dockerComposeFileNames.get()) // TODO accept vars
         openWebpage("https://localhost:8443")
     }
 }
 
-abstract class Dockerize: DefaultTask() {
+abstract class Dockerize : DefaultTask() {
+    init {
+        group = "dockerize"
+        description = "Dockerize the project"
+    }
     @get:Input
-    val commander: Commander by lazy { commander(workingDir.asFile.get()) }
+    val commander: Commander by lazy {
+        commander(
+            File(rootDir.asFile.get(), workingFolderName.get())
+        )
+    }
 
     @get:Input
     abstract val workingFolderName: Property<String>
@@ -45,15 +56,9 @@ abstract class Dockerize: DefaultTask() {
     @get:InputDirectory
     abstract val rootDir: DirectoryProperty
 
-    @get:InputDirectory
-    abstract val workingDir: DirectoryProperty
-
     @TaskAction
     fun action() {
-        val process =
-            "curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'zip' | cut -d\\\" -f4".runCommand(
-                rootDir.asFile.get().absolutePath
-            ) // TODO make multiplatform
+        val process = commander.getJitsiDownloadUrl()
         val zipFile = process.getOutput()
         errln("Downloading and extracting from: |$zipFile|")
 
@@ -68,7 +73,7 @@ abstract class Dockerize: DefaultTask() {
         errln(".env file copied to $workingFolder")
 
         errln("Generating passwords to .env file in $workingFolder")
-        "./gen-passwords.sh".runCommand(workingFolder) // TODO make multiplatform
+        commander.generatePasswords()
 
         errln("Generating jitsi config files in ~!??!?!")
         "mkdir -p ~/.jitsi-meet-cfg/{web,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}".runCommand(
