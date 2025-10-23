@@ -23,7 +23,7 @@ It corresponds to the [config documentation here](https://jitsi.github.io/handbo
 
 ## General layout
 
-This is a gradle build. The file ``build.gradle.kts`` defines a task called `dockerify` that downloads and unzips the 
+This is a gradle build. The file ``build.gradle.kts`` defines a task called `dockerize` that downloads and unzips the 
 latest jitsi-meet distribution (into the ```jitsi-meet``` folder. It then copies the ```env.master``` file into that folder,
 as ```.env```.
 
