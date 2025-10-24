@@ -4,6 +4,7 @@ import tasks.DockerComposeUp
 import tasks.Dockerize
 
 val workingFolderName = "jitsi-meet"
+File(projectDir, workingFolderName).mkdirs()
 
 tasks.register<Dockerize>("dockerize") {
     workingFolderName = "jitsi-meet"
@@ -57,5 +58,5 @@ with(certificateManager(File(projectDir, "certs"))) {
     }
 }
 
-fun Build_gradle.buildFolder() = layout.buildDirectory.get().asFile
+fun Project.buildFolder() = layout.buildDirectory.get().asFile
 
