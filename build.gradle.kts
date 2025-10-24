@@ -2,8 +2,11 @@ import commands.certificateManager
 import commands.commander
 import tasks.DockerComposeUp
 import tasks.Dockerize
+import tasks.DownloadTask
 
 val workingFolderName = "jitsi-meet"
+val whiteBoardDownloadUrl = "https://github.com/OnlineLearningSessions/whiteboard/archive/refs/heads/master.zip"
+
 File(projectDir, workingFolderName).mkdirs()
 
 tasks.register<Dockerize>("dockerize") {
@@ -30,7 +33,7 @@ with(File(projectDir, workingFolderName)) {
 
 with(commander(projectDir)) {
     tasks.create("clean") {
-        group = "build setup"
+        group = "ols"
         doLast {
             removeFromFs(buildFolder())
         }
@@ -39,24 +42,32 @@ with(commander(projectDir)) {
 
 with(certificateManager(File(projectDir, "certs"))) {
     tasks.create("generatePk") {
-        group = "dockerize"
+        group = "ols"
         doLast {
             generatePk()
         }
     }
     tasks.create("generateCsr") {
-        group = "dockerize"
+        group = "ols"
         doLast {
             generateCsr()
         }
     }
     tasks.create("generateSelfSignedCert") {
-        group = "dockerize"
+        group = "ols"
         doLast {
             generateSelfSignedCert()
         }
     }
 }
 
+tasks.register<DownloadTask>("downloadWhiteboard") {
+    rootDir.set(projectDir)
+    downloadUrl.set(whiteBoardDownloadUrl)
+    workingFolderName.set("whiteboard")
+    destination.set("whiteboard-master.zip")
+}
+
 fun Project.buildFolder() = layout.buildDirectory.get().asFile
+
 
