@@ -18,7 +18,7 @@ import java.io.File
 
 abstract class DockerComposeUp : DefaultTask() {
     init {
-        group = "dockerCompose"
+        group = "ols"
         description = "Run docker compose"
     }
 
@@ -40,7 +40,7 @@ abstract class DockerComposeUp : DefaultTask() {
 
 abstract class Dockerize : DefaultTask() {
     init {
-        group = "dockerize"
+        group = "ols"
         description = "Dockerize the project"
     }
     @get:Input
@@ -75,7 +75,7 @@ abstract class Dockerize : DefaultTask() {
         errln("Generating passwords to .env file in $workingFolder")
         commander.generatePasswords()
 
-        errln("Generating jitsi config files in ~!??!?!")
+        errln("Generating jitsi config files in $workingFolder")
         "mkdir -p ~/.jitsi-meet-cfg/{web,transcripts,prosody/config,prosody/prosody-plugins-custom,jicofo,jvb,jigasi,jibri}".runCommand(
             workingFolder
         ) // TODO make multiplatform
