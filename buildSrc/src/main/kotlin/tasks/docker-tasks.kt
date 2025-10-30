@@ -43,6 +43,7 @@ abstract class Dockerize : DefaultTask() {
         group = "ols"
         description = "Dockerize the project"
     }
+
     @get:Input
     val commander: Commander by lazy {
         commander(

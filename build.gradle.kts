@@ -45,18 +45,25 @@ with(certificateManager(File(projectDir, "certs"))) {
         group = "ols"
         doLast {
             generatePk()
+//            generatePk(outFile = File("meet.jitsi.crt"))
         }
     }
     tasks.create("generateCsr") {
         group = "ols"
         doLast {
             generateCsr()
+            generateCsr(key = File("meet.jitsi.key"), outFile = File("meet.jitsi.crt"))
         }
     }
     tasks.create("generateSelfSignedCert") {
         group = "ols"
         doLast {
-            generateSelfSignedCert()
+            for (host  in listOf("localhost, meet.jitsi, auth.meet.jitsi"))
+            generateSelfSignedCert(
+                key = File("$host.key"),
+                csr = File("$host.csr"),
+                outFile = File("$host.crt")
+            )
         }
     }
 }
