@@ -1,0 +1,33 @@
+digraph jitsi {
+    conference [label = Conference];
+    conference_server [label="Conference Server\n(whiteboard,signaling, custom chat)"];
+    domain [color=blue, label="Domain"]
+    jibri [color=blue, fontcolor=blue]
+    jicofo [color=blue, fontcolor=blue, label="jicofo"]
+    jvb [color=blue, fontcolor=blue]
+    mongo [shape=box];
+    prosody [color=blue, fontcolor=blue, label="Prosody\nxmpp.meet.jitsi"];
+    whiteboard [label=Whiteboard];
+    whiteboard_server[label="Whiteboard Server"];
+
+# docker dependencies
+    jicofo -> prosody [dir=reverse, style=dashed]
+    jvb -> prosody [dir=reverse, style=dashed]
+
+
+    conference -> jicofo [label="config.ts:hosts.focus"];
+    conference -> domain [label="config.ts:hosts.domain"];
+    conference -> conference_server
+    whiteboard->whiteboard_server[label="/ws/_ws -> 3334:ws"];
+    whiteboard_server -> mongo[label="mongodb://127.0.0.1:27017", style=dotted];
+    whiteboard -> conference [label="iframe", style = dotted];
+    conference_server -> whiteboard_server [label="config.ts:whiteboardUrl"];
+    conference_server -> prosody[label="config.ts:serviceUrl"];
+
+    jvb -> conference [label="streaming",color=red, dir = both]
+    jvb -> prosody [label= XMPP, color=red, dir = both]
+    jvb -> jibri [label="streaming",color=red, dir = both]
+    prosody -> conference_server [label = wss, color=red, dir=both]
+    prosody -> jicofo [label = wss, color=red, dir=both]
+    prosody -> jvb [label = wss, color=red, dir=both]
+}

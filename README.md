@@ -34,3 +34,7 @@ The stuff in the ```buildSrc``` folder is just supporting code for the ```gradle
 ## Why gradle?
 
 No better way...
+
+# Environment variables for compose pod
+
+- AUTOSCALER_URL: Optional. (jvb) Url for an autoscaler URL

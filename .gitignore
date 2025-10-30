@@ -6,3 +6,5 @@ build
 /jitsi-meet/
 /.idea/
 /certs/
+/conference/
+/whiteboard/
