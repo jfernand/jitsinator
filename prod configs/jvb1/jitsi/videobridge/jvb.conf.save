@@ -1,0 +1,72 @@
+videobridge {
+    http-servers {
+        public {
+            port = 9090
+        }
+    }
+    websockets {
+        enabled = true
+        domain = "sessions.onlinelearningsessions.com:443"
+        tls = true
+    }videobridge {
+    http-servers {
+        public {
+            port = 9090
+        }
+    }
+    websockets {
+        enabled = true
+        domain = "sessions.onlinelearningsessions.com:443"
+        tls = true
+    }
+    stats {
+      # Enable broadcasting stats/presence in a MUC
+      enabled = true
+      transports = [
+        { type = "muc" }
+      ]
+    }
+
+    apis {
+      xmpp-client {
+        configs {
+          # Connect to the first XMPP server
+          xmpp-server-1 {
+            hostname="sessions.onlinelearningsessions.com"
+            domain = "auth.sessions.onlinelearningsessions.com"
+            username = "jvb"
+            password = "O8AdtqqM"
+            muc_jids = "JvbBrewery@internal.auth.sessions.onlinelearningsessions.com"
+            # The muc_nickname must be unique across all jitsi-videobridge instances
+            muc_nickname = "jvb2-1"
+            disable_certificate_verification = true
+        }
+      }
+    }
+  }
+    stats {
+      # Enable broadcasting stats/presence in a MUC
+      enabled = true
+      transports = [
+        { type = "muc" }
+      ]
+    }
+
+    apis {
+      xmpp-client {
+        configs {
+          # Connect to the first XMPP server
+          xmpp-server-1 {
+            hostname="sessions.onlinelearningsessions.com"
+            domain = "auth.sessions.onlinelearningsessions.com"
+            username = "jvb"
+            password = "O8AdtqqM"
+            muc_jids = "JvbBrewery@internal.auth.sessions.onlinelearningsessions.com"
+            # The muc_nickname must be unique across all jitsi-videobridge instances
+            muc_nickname = "jvb2-1"
+            disable_certificate_verification = true
+        }
+      }
+    }
+  }
+}

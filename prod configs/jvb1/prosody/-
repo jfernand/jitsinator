@@ -1,0 +1,21 @@
+admins = { }
+plugin_paths = { "/usr/local/lib/prosody/modules" }
+modules_enabled = {
+}
+modules_disabled = {
+}
+allow_registration = false
+daemonize = false;
+pidfile = "/run/prosody/prosody.pid";
+c2s_require_encryption = true
+s2s_require_encryption = true
+s2s_secure_auth = false
+authentication = "internal_hashed"
+log = {
+	info = "/var/log/prosody/prosody.log";
+	error = "/var/log/prosody/prosody.err";
+	{ levels = { "error" }; to = "syslog";  };
+}
+certificates = "certs"
+VirtualHost "localhost"
+Include "conf.d/*.cfg.lua"

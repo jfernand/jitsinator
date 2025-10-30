@@ -1,0 +1,3 @@
+# Legacy conf file, new format already at
+# /etc/jitsi/videobridge/jvb.conf
+# --add-jvb2-node.sh
