@@ -1,5 +1,6 @@
 package commands
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import system.Os
 import system.getCurrentOs
 import java.io.File
@@ -25,9 +26,14 @@ fun commander(workingDir: File) =
 
 
 class LinuxCommander(override val workingDir: File) : Commander {
+    private val logger = KotlinLogging.logger {}
+
     override fun download(url: String) =
         "wget $url"
         .runCommand(workingDir)
+        .also {
+            logger.info { "wget $url" }
+            }
 
     override fun removeFromFs(path: File) =
         "rm -Rf $path"

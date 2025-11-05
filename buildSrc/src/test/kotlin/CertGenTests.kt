@@ -1,6 +1,11 @@
-import commands.SslReq
-import commands.selfSigned
+import commands.CmdError
+import commands.Result
+import commands.certificateManager
+import commands.dsl.SslReq
+import commands.dsl.selfSigned
+import java.io.File
 import kotlin.test.Test
+import kotlin.test.fail
 
 class CertGenTests {
     @Test
@@ -15,7 +20,18 @@ class CertGenTests {
                 ou = "org.cr"
                 cn = "localhost"
             }
+            keyout = "/tmp/localhost.key"
+            out = "/tmp/localhost.crt"
         }
-        println(req)
+        val commander = certificateManager(File("/tmp"))
+        when (val ret = commander.generateSelfSignedCert(req)) {
+            is Result.Failure<*, CmdError> -> {
+                println(ret.output.output)
+                println(ret.output.stdError)
+                fail("Process executes correctly")
+            }
+
+            is Result.Success<*, *> -> {}
+        }
     }
 }

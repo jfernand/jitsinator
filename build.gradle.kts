@@ -1,5 +1,7 @@
 import commands.certificateManager
 import commands.commander
+import commands.dsl.SslReq
+import commands.dsl.selfSigned
 import tasks.DockerComposeUp
 import tasks.Dockerize
 import tasks.DownloadTask
@@ -10,6 +12,7 @@ val whiteBoardDownloadUrl = "https://github.com/OnlineLearningSessions/whiteboar
 File(projectDir, workingFolderName).mkdirs()
 
 tasks.register<Dockerize>("dockerize") {
+    dependsOn("generateSelfSignedCert")
     workingFolderName = "jitsi-meet"
     rootDir.set(projectDir)
 }
@@ -32,7 +35,7 @@ with(File(projectDir, workingFolderName)) {
 }
 
 with(commander(projectDir)) {
-    tasks.create("clean") {
+    tasks.create<Task>("clean") {
         group = "ols"
         doLast {
             removeFromFs(buildFolder())
@@ -41,29 +44,39 @@ with(commander(projectDir)) {
 }
 
 with(certificateManager(File(projectDir, "certs"))) {
-    tasks.create("generatePk") {
+//    tasks.create("generatePk") {
+//        group = "ols"
+//        doLast {
+//            generatePk()
+////            generatePk(outFile = File("meet.jitsi.crt"))
+//        }
+//    }
+//    tasks.create("generateCsr") {
+//        group = "ols"
+//        doLast {
+//            generateCsr()
+//            generateCsr(key = File("meet.jitsi.key"), outFile = File("meet.jitsi.crt"))
+//        }
+//    }
+    tasks.create<Task>("generateSelfSignedCert") {
         group = "ols"
+        description = "Generates self-signed certificate to be used by e.g. prosody"
         doLast {
-            generatePk()
-//            generatePk(outFile = File("meet.jitsi.crt"))
-        }
-    }
-    tasks.create("generateCsr") {
-        group = "ols"
-        doLast {
-            generateCsr()
-            generateCsr(key = File("meet.jitsi.key"), outFile = File("meet.jitsi.crt"))
-        }
-    }
-    tasks.create("generateSelfSignedCert") {
-        group = "ols"
-        doLast {
-            for (host  in listOf("localhost, meet.jitsi, auth.meet.jitsi"))
-            generateSelfSignedCert(
-                key = File("$host.key"),
-                csr = File("$host.csr"),
-                outFile = File("$host.crt")
-            )
+            var req: SslReq.Plain = selfSigned("localhost") {
+                type = SslReq.Type.Rsa
+                subj {
+                    c = "US"
+                    st = "MI"
+                    l = "Royal Oak"
+                    o = "onlinelearninsessions.com"
+                    ou = "org.cr"
+                    cn = "localhost"
+                }
+            } as SslReq.Plain
+            for (host in listOf("localhost", "meet.jitsi", "auth.meet.jitsi")) {
+                req = req.copy(name = host, out = "$host.crt", keyout = "$host.key")
+                generateSelfSignedCert(req)
+            }
         }
     }
 }

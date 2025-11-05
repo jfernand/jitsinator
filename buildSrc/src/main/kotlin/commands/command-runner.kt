@@ -1,10 +1,13 @@
 package commands
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import system.Os
 import system.errln
 import system.getCurrentOs
 import java.io.File
 import java.io.InputStream
+
+private val logger = KotlinLogging.logger {}
 
 fun Process.dump() =
     run {
@@ -60,7 +63,7 @@ private class LinuxCommandRunner : CommandRunner {
 private class WindowsCommandRunner : CommandRunner {
     override fun invoke(p1: String, p2: File): Process =
         p1.run {
-            errln("Running command: $this")
+            logger.info { "Running command: $this"}
             ProcessBuilder("cmd", "/c", this)
                 .directory(p2)
                 .start()

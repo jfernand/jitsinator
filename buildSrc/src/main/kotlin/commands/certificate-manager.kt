@@ -1,25 +1,31 @@
 package commands
 
+import commands.dsl.SslReq
+import commands.dsl.selfSigned
+import io.github.oshai.kotlinlogging.KotlinLogging
 import system.Os
 import system.getCurrentOs
 import java.io.File
-import javax.security.auth.Subject
 
 interface CertificateGenerator {
     val workingDir: File
 
-    fun generatePk(outFile: File = File("localhost.key"))
-
-    fun generateCsr(
-        key: File = File("localhost.key"),
-        outFile: File = File("localhost.csr"),
-    )
+//    fun generatePk(outFile: File = File("localhost.key"))
+//
+//    fun generateCsr(
+//        key: File = File("localhost.key"),
+//        outFile: File = File("localhost.csr"),
+//    )
+//
+//    fun generateSelfSignedCert(
+//        csr: File = File("localhost.csr"),
+//        key: File = File("localhost.key"),
+//        outFile: File = File("localhost.crt"),
+//    )
 
     fun generateSelfSignedCert(
-        csr: File = File("localhost.csr"),
-        key: File = File("localhost.key"),
-        outFile: File = File("localhost.crt"),
-    )
+        sslReq: SslReq,
+    ): Result<Unit, CmdError>
 }
 
 fun certificateManager(workingDir: File): CertificateGenerator = when (getCurrentOs()) {
@@ -30,6 +36,12 @@ fun certificateManager(workingDir: File): CertificateGenerator = when (getCurren
 }
 
 private class LinuxCertificateGenerator(override val workingDir: File) : CertificateGenerator {
+    private val logger = KotlinLogging.logger {}
+
+    fun generate(req: SslReq) =
+        req.toString()
+            .also { logger.info { "Generating certificate with command: $it" } }
+
     fun pkCommand(outFile: File) =
         "openssl genrsa -out ${File(workingDir, outFile.name)} 2048"
 
@@ -53,74 +65,31 @@ private class LinuxCertificateGenerator(override val workingDir: File) : Certifi
             )
         } -out ${File(workingDir, outFile.name)} "
 
-    override fun generatePk(outFile: File) {
-        pkCommand(outFile).runCommand(workingDir)
-    }
+//    override fun generatePk(outFile: File) {
+//        pkCommand(outFile).runCommand(workingDir)
+//    }
+//
+//    override fun generateCsr(key: File, outFile: File) {
+//        csrCommand(key, outFile).runCommand(workingDir)
+//    }
+//
+//    override fun generateSelfSignedCert(csr: File, key: File, outFile: File) {
+//        selfSignedCertificateCommand(csr, key, outFile).runCommand(workingDir)
+//    }
 
-    override fun generateCsr(key: File, outFile: File) {
-        csrCommand(key, outFile).runCommand(workingDir)
-    }
-
-    override fun generateSelfSignedCert(csr: File, key: File, outFile: File) {
-        selfSignedCertificateCommand(csr, key, outFile).runCommand(workingDir)
-    }
-}
-
-sealed interface SslReq {
-    enum class Type {
-        Rsa, Ec
-    }
-
-    data class Plain(val name: String, val type: Type, val subject: Subj) : SslReq
-    data class WithSan(val name: String, val type: Type, val subject: Subj, val san: San) : SslReq
-    data class Subj(
-        var c: String? = null,
-        var st: String? = null,
-        var l: String? = null,
-        var o: String? = null,
-        var ou: String? = null,
-        var cn: String? = null,
-    ) {
-        override fun toString() : String = "/C=$c/ST=$st/L=$l/O=$o/OU=IT/CN=$cn"
-    }
-
-    data class San(val dnsNames: List<String>? = null, val ipAddresses: List<String>? = null)
-}
-
-fun main() {
-    val req = selfSigned("localhost") {
-        subj {
-            c = "US"
-            st = "MI"
-            l = "Royal Oak"
-            o = "onlinelearninsessions.com"
-            ou = "org.cr"
-            cn = "localhost"
+    override fun generateSelfSignedCert(sslReq: SslReq): Result<Unit, CmdError> {
+        val cmd = "$sslReq"
+        val process = cmd.runCommand(workingDir)
+        return when (val ret = process.waitFor()) {
+            0 -> Result.Success(Unit)
+            else -> Result.Failure(CmdError(ret, process.getOutput(), process.getError()))
         }
     }
-    println(req)
 }
 
-class ReqCtx {
-    lateinit var subj: SslReq.Subj
-    var san: SslReq.San? = null
-    var type: SslReq.Type? = null
+data class CmdError(val exitCode: Int, val output: String, val stdError: String)
 
-    fun subj(block: SslReq.Subj.() -> Unit) {
-        val s = SslReq.Subj()
-        s.block()
-        subj = s
-    }
-
-    fun toReq(name: String): SslReq = if (san == null) {
-        SslReq.Plain(name, type ?: error("Encryption type is missing"), subj)
-    } else {
-        SslReq.WithSan(name, type ?: error("Encryption type is missing"), subj, san!!)
-    }
-}
-
-fun selfSigned(name: String, block: ReqCtx.() -> Unit): SslReq {
-    val ctx = ReqCtx()
-    ctx.block()
-    return ctx.toReq(name)
+sealed interface Result<T, E> {
+    data class Success<T, E>(val output: T) : Result<T, E>
+    data class Failure<T, E>(val output: E) : Result<T, E>
 }

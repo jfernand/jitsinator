@@ -1,4 +1,5 @@
 - [ ] PUBLIC_URL must point to real url
 - [x] Create cert chain for meet.jitsi and deploy to config folder
-- [ ] xmpp.meet.jitsi
+- [x] xmpp.meet.jitsi
 - [ ] Put certs inside prosody container ?
+- [ ] Watch out for certificate expiration.
