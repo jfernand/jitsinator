@@ -44,20 +44,6 @@ with(commander(projectDir)) {
 }
 
 with(certificateManager(File(projectDir, "certs"))) {
-//    tasks.create("generatePk") {
-//        group = "ols"
-//        doLast {
-//            generatePk()
-////            generatePk(outFile = File("meet.jitsi.crt"))
-//        }
-//    }
-//    tasks.create("generateCsr") {
-//        group = "ols"
-//        doLast {
-//            generateCsr()
-//            generateCsr(key = File("meet.jitsi.key"), outFile = File("meet.jitsi.crt"))
-//        }
-//    }
     tasks.create<Task>("generateSelfSignedCert") {
         group = "ols"
         description = "Generates self-signed certificate to be used by e.g. prosody"
